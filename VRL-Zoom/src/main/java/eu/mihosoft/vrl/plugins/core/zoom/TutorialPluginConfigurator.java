@@ -13,13 +13,14 @@ import eu.mihosoft.vrl.system.VPluginAPI;
 import eu.mihosoft.vrl.system.VPluginConfigurator;
 import eu.mihosoft.vrl.visual.ActionDelegator;
 import eu.mihosoft.vrl.visual.VAction;
-import eu.mihosoft.vrl.visual.VSwingUtil;
+import eu.mihosoft.vrlzoom.JXTransformer;
 import java.awt.Container;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
-import javax.swing.JComponent;
+import javax.swing.RepaintManager;
 
 /**
  *
@@ -80,7 +81,9 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
 
                 @Override
                 public void actionPerformed(ActionEvent ae, Object o) {
-                    new Thread(()->{enableZoom(vapi);}).start();
+
+                    enableZoomSwing(vapi);
+
                 }
 
             }, ActionDelegator.VIEW_MENU);
@@ -99,40 +102,57 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
         }
     }
 
-    private void enableZoom(VPluginAPI vApi) {
+    private void enableZoomSwing(VPluginAPI vApi) {
+        VisualCanvas vCanvas = (VisualCanvas) vApi.getCanvas();
+        canvasParent.removeAll();
 
-        Object[] refs = {null, null};
+        JXTransformer canvasContainer = new JXTransformer(vCanvas);
 
-        VSwingUtil.invokeLater(() -> {
-            System.out.println("debug:1");
-            VisualCanvas vCanvas = (VisualCanvas) vApi.getCanvas();
-            refs[0] = vCanvas;
+        canvasContainer.scale(0.75, 0.75);
 
-            final JFXPanel fxPanel = new JFXPanel();
-            refs[1] = fxPanel;
-            
-            
-            System.out.println("debug:1:1");
+        canvasParent.add(canvasContainer);
+        
+        vCanvas.getDock().setVisible(false);
+    }
 
-            canvasParent.removeAll();
-            System.out.println("debug:1:2");
-            canvasParent.add(fxPanel);
-        });
+    private void enableZoomFX(VPluginAPI vApi) {
 
+        System.out.println("debug:1");
+        VisualCanvas vCanvas = (VisualCanvas) vApi.getCanvas();
+
+        final JFXPanel fxPanel = new JFXPanel();
+
+        System.out.println("debug:1:1");
+
+        canvasParent.removeAll();
+        System.out.println("debug:1:2");
+        canvasParent.add(fxPanel);
         System.out.println("debug:2");
 
+//        RepaintManager canvasRepaintMagager = RepaintManager.currentManager(vCanvas);
+        RepaintManager.setCurrentManager(null);
+
         Platform.runLater(() -> {
+
             System.out.println("debug:2:1");
             ScalableSwingNode swingNode = new ScalableSwingNode();
             swingNode.setMinSize(800, 600);
 
-            swingNode.setContent((JComponent) refs[0]);
+            swingNode.setContent(vCanvas);
             System.out.println("debug:2:2");
 
             swingNode.setMaxScaleX(0.5);
             swingNode.setMaxScaleY(0.5);
 
-            ((JFXPanel)refs[1]).setScene(new Scene(swingNode));
+//            Stage zoomStage = new Stage();
+//
+//            zoomStage.setScene(new Scene(swingNode));
+//            zoomStage.show();
+//            
+//            zoomStage.setOnCloseRequest((WindowEvent event) -> {
+//                VSwingUtil.invokeLater(()->{canvasParent.add(vCanvas);});
+//            });
+            fxPanel.setScene(new Scene(swingNode));
             System.out.println("debug:2:3");
         });
         System.out.println("debug:3");
@@ -142,6 +162,8 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
         VisualCanvas vCanvas = (VisualCanvas) vApi.getCanvas();
         canvasParent.removeAll();
         canvasParent.add(vCanvas);
+        
+        vCanvas.getDock().setVisible(true);
     }
 
     @Override
