@@ -1,8 +1,8 @@
-# VRL-Tutorial-Plugin-01
+# VRL-Zoom Plugin
 
 [![Build Status](https://travis-ci.org/miho/VRL-Tutorial-Plugin-01.png)](https://travis-ci.org/miho/VRL-Tutorial-Plugin-01)
 
-This project demonstrates how to create a simple [VRL](http://vrl-studio.mihosoft.eu) plugin.
+This project demonstrates how to create a simple [VRL](http://vrl-studio.mihosoft.eu) zoom plugin.
 
 Webpage: http://vrl-studio.mihosoft.eu
 
@@ -12,7 +12,7 @@ Join the [Developer Group](https://groups.google.com/forum/#!forum/vrl-developer
 
 ### 1. Dependencies
 
-- JDK >= 1.6
+- JDK = 1.8
 - Internet Connection (other dependencies will be downloaded automatically)
 - Optional: IDE with [Gradle](http://www.gradle.org/) support
 
