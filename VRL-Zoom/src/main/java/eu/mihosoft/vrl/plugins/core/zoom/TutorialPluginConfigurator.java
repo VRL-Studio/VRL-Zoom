@@ -13,10 +13,12 @@ import eu.mihosoft.vrl.system.VPluginAPI;
 import eu.mihosoft.vrl.system.VPluginConfigurator;
 import eu.mihosoft.vrl.visual.ActionDelegator;
 import eu.mihosoft.vrl.visual.VAction;
+import eu.mihosoft.vrl.visual.VDialog;
 import eu.mihosoft.vrlzoom.JXTransformer;
 import java.awt.Container;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -29,6 +31,8 @@ import javax.swing.RepaintManager;
 public class TutorialPluginConfigurator extends VPluginConfigurator {
 
     private Container canvasParent;
+
+    private ActionListener dialogActionListener;
 
     public TutorialPluginConfigurator() {
         //specify the plugin name and version
@@ -49,6 +53,10 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
 
         // specify dependencies
         addDependency(new PluginDependency("VRL", "0.4.3.0.1", "0.4.x"));
+
+        setAutomaticallySelected(true);
+        setRelevantForPersistence(false);
+
     }
 
     @Override
@@ -99,7 +107,15 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
 
             canvasParent = vapi.getCanvas().getParent();
 
+            dialogActionListener = (ActionEvent e) -> {
+                disableZoom(vapi);
+            };
+            
+            VDialog.addDialogActionListener(dialogActionListener);
+
         }
+
+        
     }
 
     private void enableZoomSwing(VPluginAPI vApi) {
@@ -108,10 +124,10 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
 
         JXTransformer canvasContainer = new JXTransformer(vCanvas);
 
-        canvasContainer.scale(0.75, 0.75);
+        canvasContainer.scale(0.5, 0.5);
 
         canvasParent.add(canvasContainer);
-        
+
         vCanvas.getDock().setVisible(false);
     }
 
@@ -162,13 +178,18 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
         VisualCanvas vCanvas = (VisualCanvas) vApi.getCanvas();
         canvasParent.removeAll();
         canvasParent.add(vCanvas);
-        
+
         vCanvas.getDock().setVisible(true);
     }
 
     @Override
     public void unregister(PluginAPI api) {
-        // nothing to unregister
+        
+        System.out.println("debug:UNREGISTER");
+        
+        if (dialogActionListener != null) {
+            VDialog.removeDialogActionListener(dialogActionListener);
+        }
     }
 
     @Override

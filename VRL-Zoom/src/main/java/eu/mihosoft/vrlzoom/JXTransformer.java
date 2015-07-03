@@ -19,6 +19,7 @@
 package eu.mihosoft.vrlzoom;
 
 import eu.mihosoft.vrl.visual.EffectPane;
+import eu.mihosoft.vrl.visual.TransformingParent;
 //import eu.mihosoft.vrl.visual.VisualUtilities;
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +48,7 @@ import java.util.HashMap;
  *
  * https://swinghelper.dev.java.net/ http://weblogs.java.net/blog/alexfromsun/
  */
-public class JXTransformer extends JPanel {
+public class JXTransformer extends JPanel implements TransformingParent {
 
     private Component glassPane = new MagicGlassPane();
     private Component view;
@@ -57,7 +58,7 @@ public class JXTransformer extends JPanel {
 
     private BufferedImage renderBuffer;
     private BufferedImage renderBufferDst;
-    private AffineTransformOp scaleOp;
+    private AffineTransformOp renderBufferScaleOp;
 
     public JXTransformer() {
         this(null);
@@ -256,10 +257,6 @@ public class JXTransformer extends JPanel {
             repaint();
         }
 
-//        Rectangle bounds = g.getClipBounds();
-//        
-//        
-//        g.setClip(bounds.x, bounds.y, bounds.width, bounds.height);
         super.paint(g);
     }
 
@@ -276,12 +273,14 @@ public class JXTransformer extends JPanel {
             renderBuffer = gc.createCompatibleImage(view.getWidth(), view.getHeight(),
                     Transparency.TRANSLUCENT);
             
-            scaleOp
+            renderBufferScaleOp
                 = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
             
-            renderBufferDst = scaleOp.createCompatibleDestImage(renderBuffer,
+            renderBufferDst = renderBufferScaleOp.createCompatibleDestImage(renderBuffer,
                     ColorModel.getRGBdefault());
         }
+        
+//        Graphics2D g2 = (Graphics2D) g;
 
         Graphics2D g2 = renderBuffer.createGraphics();
 
@@ -293,6 +292,12 @@ public class JXTransformer extends JPanel {
         super.paintChildren(g2);
 
         g2.dispose();
+        
+        g2.setTransform(at);
+        
+//        super.paintChildren(g2);
+        
+//        if (true)return;
 
         Graphics2D g2R = (Graphics2D) g;
 
@@ -300,9 +305,19 @@ public class JXTransformer extends JPanel {
                 RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        renderBufferDst = scaleOp.filter(renderBuffer, renderBufferDst);
+        renderBufferDst = renderBufferScaleOp.filter(renderBuffer, renderBufferDst);
 
         g2R.drawImage(renderBufferDst, 0, 0, null);
+    }
+
+    @Override
+    public double getScaleX() {
+        return getTransform().getScaleX();
+    }
+
+    @Override
+    public double getScaleY() {
+        return getTransform().getScaleY();
     }
 
     private class MagicGlassPane extends JPanel {
