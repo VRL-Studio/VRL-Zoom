@@ -563,10 +563,8 @@ public class JXTransformer extends JPanel implements TransformingParent {
                             dispatchMouseEvent(
                                     createEnterExitEvent(
                                             mouseCurrentComponent, MouseEvent.MOUSE_ENTERED, e));
-                            System.out.println("ENTER : 4");
                             mousePreviouslyEnteredComponent = mouseEnteredComponent;
                         } else {
-                            System.out.println("EXIT : 4");
                             dispatchMouseEvent(
                                     createEnterExitEvent(
                                             mouseEnteredComponent, MouseEvent.MOUSE_EXITED, e));
