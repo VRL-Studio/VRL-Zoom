@@ -20,6 +20,7 @@ package eu.mihosoft.vrlzoom;
 
 import eu.mihosoft.vrl.visual.EffectPane;
 import eu.mihosoft.vrl.visual.TransformingParent;
+import eu.mihosoft.vrl.visual.VSwingUtil;
 //import eu.mihosoft.vrl.visual.VisualUtilities;
 import javax.swing.*;
 import java.awt.*;
@@ -262,21 +263,27 @@ public class JXTransformer extends JPanel implements TransformingParent {
 
     @Override
     protected void paintChildren(Graphics g) {
+        
+        int bufferW =(int)(getWidth()/at.getScaleX());
+        int bufferH = (int)(getHeight()/at.getScaleY());
 
-        if (renderBuffer == null || renderBuffer.getWidth() != view.getWidth()
-                || renderBuffer.getHeight() != view.getHeight()) {
+        if (renderBuffer == null 
+                || renderBuffer.getWidth() != bufferW
+                || renderBuffer.getHeight() != bufferH) {
 
             GraphicsConfiguration gc
                     = GraphicsEnvironment.getLocalGraphicsEnvironment().
                     getDefaultScreenDevice().getDefaultConfiguration();
 
-            renderBuffer = gc.createCompatibleImage(view.getWidth(), view.getHeight(),
+            renderBuffer = gc.createCompatibleImage(
+                    bufferW, bufferH,
                     Transparency.TRANSLUCENT);
             
             renderBufferScaleOp
                 = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
             
-            renderBufferDst = renderBufferScaleOp.createCompatibleDestImage(renderBuffer,
+            renderBufferDst = renderBufferScaleOp.
+                    createCompatibleDestImage(renderBuffer,
                     ColorModel.getRGBdefault());
         }
         
@@ -296,7 +303,6 @@ public class JXTransformer extends JPanel implements TransformingParent {
         g2.setTransform(at);
         
 //        super.paintChildren(g2);
-        
 //        if (true)return;
 
         Graphics2D g2R = (Graphics2D) g;
@@ -305,8 +311,9 @@ public class JXTransformer extends JPanel implements TransformingParent {
                 RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        renderBufferDst = renderBufferScaleOp.filter(renderBuffer, renderBufferDst);
-
+        renderBufferDst = renderBufferScaleOp.
+                filter(renderBuffer, renderBufferDst);
+  
         g2R.drawImage(renderBufferDst, 0, 0, null);
     }
 

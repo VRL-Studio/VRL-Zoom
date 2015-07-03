@@ -12,13 +12,18 @@ import eu.mihosoft.vrl.system.PluginIdentifier;
 import eu.mihosoft.vrl.system.VPluginAPI;
 import eu.mihosoft.vrl.system.VPluginConfigurator;
 import eu.mihosoft.vrl.visual.ActionDelegator;
+import eu.mihosoft.vrl.visual.CanvasRepaintManager;
 import eu.mihosoft.vrl.visual.VAction;
 import eu.mihosoft.vrl.visual.VDialog;
+import eu.mihosoft.vrl.visual.VKey;
+import eu.mihosoft.vrl.visual.VShortCut;
+import eu.mihosoft.vrl.visual.VShortCutAction;
+import eu.mihosoft.vrl.visual.VSwingUtil;
 import eu.mihosoft.vrlzoom.JXTransformer;
 import java.awt.Container;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -33,6 +38,11 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
     private Container canvasParent;
 
     private ActionListener dialogActionListener;
+
+    private double scale = 1.0;
+
+    VShortCutAction zoomOutAction;
+    VShortCutAction zoomInAction;
 
     public TutorialPluginConfigurator() {
         //specify the plugin name and version
@@ -84,38 +94,86 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
             //
             // vapi.addComponent(MyComponent.class);
             // vapi.addTypeRepresentation(MyType.class);
-//           vapi.addComponent(TutorialComponent01.class);
-            vapi.addAction(new VAction("Enable Zooming") {
+            vapi.addAction(new VAction("Zoom Out (Ctrl+Alt+0)") {
 
                 @Override
                 public void actionPerformed(ActionEvent ae, Object o) {
-
-                    enableZoomSwing(vapi);
-
+                    decZoom(vapi);
                 }
 
             }, ActionDelegator.VIEW_MENU);
 
-            vapi.addAction(new VAction("Disable Zooming") {
+            vapi.addAction(new VAction("Zoom In (Ctrl+Alt+9)") {
 
                 @Override
                 public void actionPerformed(ActionEvent ae, Object o) {
-                    disableZoom(vapi);
+                    incZoom(vapi);
                 }
 
             }, ActionDelegator.VIEW_MENU);
+
+            if (zoomInAction != null) {
+                VSwingUtil.unregisterShortCutAction(zoomInAction);
+            }
+            if (zoomOutAction != null) {
+                VSwingUtil.unregisterShortCutAction(zoomOutAction);
+            }
+
+            zoomInAction = new VShortCutAction(
+                    new VShortCut("Zoom In",
+                            new VKey(KeyEvent.VK_CONTROL),
+                            new VKey(KeyEvent.VK_ALT),
+                            new VKey(KeyEvent.VK_9))) {
+                        @Override
+                        public void performAction() {
+                            incZoom(vapi);
+                        }
+                    };
+            VSwingUtil.registerShortCutAction(zoomInAction);
+            zoomOutAction = new VShortCutAction(
+                    new VShortCut("Zoom Out",
+                            new VKey(KeyEvent.VK_CONTROL),
+                            new VKey(KeyEvent.VK_ALT),
+                            new VKey(KeyEvent.VK_0))) {
+                        @Override
+                        public void performAction() {
+                            decZoom(vapi);
+                        }
+                    };
+            VSwingUtil.registerShortCutAction(zoomOutAction);
 
             canvasParent = vapi.getCanvas().getParent();
 
             dialogActionListener = (ActionEvent e) -> {
                 disableZoom(vapi);
             };
-            
+
             VDialog.addDialogActionListener(dialogActionListener);
 
         }
 
-        
+    }
+
+    private void decZoom(VPluginAPI vApi) {
+        scale -= 0.1;
+
+        if (scale < 0.25) {
+            scale = 0.25;
+        }
+
+        enableZoomSwing(vApi);
+    }
+
+    private void incZoom(VPluginAPI vApi) {
+        scale += 0.1;
+
+        if (scale < 1.0) {
+            enableZoomSwing(vApi);
+        } else {
+            scale = 1.0;
+            disableZoom(vApi);
+        }
+
     }
 
     private void enableZoomSwing(VPluginAPI vApi) {
@@ -124,13 +182,14 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
 
         JXTransformer canvasContainer = new JXTransformer(vCanvas);
 
-        canvasContainer.scale(0.5, 0.5);
-
+        canvasContainer.scale(scale, scale);
         canvasParent.add(canvasContainer);
-
         vCanvas.getDock().setVisible(false);
+
+        RepaintManager.setCurrentManager(new RepaintManager());
     }
 
+    @Deprecated
     private void enableZoomFX(VPluginAPI vApi) {
 
         System.out.println("debug:1");
@@ -175,20 +234,31 @@ public class TutorialPluginConfigurator extends VPluginConfigurator {
     }
 
     private void disableZoom(VPluginAPI vApi) {
+        scale = 1.0;
+
         VisualCanvas vCanvas = (VisualCanvas) vApi.getCanvas();
         canvasParent.removeAll();
         canvasParent.add(vCanvas);
 
         vCanvas.getDock().setVisible(true);
+        RepaintManager.setCurrentManager(new CanvasRepaintManager(vCanvas));
     }
 
     @Override
     public void unregister(PluginAPI api) {
-        
+
         System.out.println("debug:UNREGISTER");
-        
+
         if (dialogActionListener != null) {
             VDialog.removeDialogActionListener(dialogActionListener);
+        }
+
+        if (zoomInAction != null) {
+            VSwingUtil.unregisterShortCutAction(zoomInAction);
+        }
+
+        if (zoomOutAction != null) {
+            VSwingUtil.unregisterShortCutAction(zoomOutAction);
         }
     }
 
