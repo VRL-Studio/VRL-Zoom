@@ -11,6 +11,7 @@ import eu.mihosoft.vrl.system.PluginDependency;
 import eu.mihosoft.vrl.system.PluginIdentifier;
 import eu.mihosoft.vrl.system.VPluginAPI;
 import eu.mihosoft.vrl.system.VPluginConfigurator;
+import eu.mihosoft.vrl.system.VSysUtil;
 import eu.mihosoft.vrl.visual.ActionDelegator;
 import eu.mihosoft.vrl.visual.CanvasRepaintManager;
 import eu.mihosoft.vrl.visual.VAction;
@@ -94,7 +95,10 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
             //
             // vapi.addComponent(MyComponent.class);
             // vapi.addTypeRepresentation(MyType.class);
-            vapi.addAction(new VAction("Zoom Out (Ctrl+Alt+0)") {
+            
+            
+            
+            vapi.addAction(new VAction("Zoom Out") {
 
                 @Override
                 public void actionPerformed(ActionEvent ae, Object o) {
@@ -103,7 +107,7 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
 
             }, ActionDelegator.VIEW_MENU);
 
-            vapi.addAction(new VAction("Zoom In (Ctrl+Alt+9)") {
+            vapi.addAction(new VAction("Zoom In") {
 
                 @Override
                 public void actionPerformed(ActionEvent ae, Object o) {
@@ -119,10 +123,23 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
                 VSwingUtil.unregisterShortCutAction(zoomOutAction);
             }
 
+            VKey modifierKey1;
+            VKey modifierKey2;
+
+            // OS X treats ALT key differently. Therefore, we use the shift
+            // key as modifier on OS X.
+            if (VSysUtil.isMacOSX()) {
+                modifierKey1 = new VKey(KeyEvent.VK_META);
+                modifierKey2 = new VKey(KeyEvent.VK_SHIFT);
+            } else {
+                modifierKey1 = new VKey(KeyEvent.VK_CONTROL);
+                modifierKey2 = new VKey(KeyEvent.VK_ALT);
+            }
+
             zoomInAction = new VShortCutAction(
                     new VShortCut("Zoom In",
-                            new VKey(KeyEvent.VK_CONTROL),
-                            new VKey(KeyEvent.VK_ALT),
+                            modifierKey1,
+                            modifierKey2,
                             new VKey(KeyEvent.VK_9))) {
                         @Override
                         public void performAction() {
@@ -132,8 +149,8 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
             VSwingUtil.registerShortCutAction(zoomInAction);
             zoomOutAction = new VShortCutAction(
                     new VShortCut("Zoom Out",
-                            new VKey(KeyEvent.VK_CONTROL),
-                            new VKey(KeyEvent.VK_ALT),
+                            modifierKey1,
+                            modifierKey2,
                             new VKey(KeyEvent.VK_0))) {
                         @Override
                         public void performAction() {
