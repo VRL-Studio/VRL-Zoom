@@ -1,6 +1,6 @@
 # VRL-Zoom Plugin
 
-[![Build Status](https://travis-ci.org/miho/VRL-Zoom.png)](https://travis-ci.org/miho/VRL-Zoom)
+[![Build Status](https://travis-ci.org/VRL-Studio/VRL-Zoom.svg)](https://travis-ci.org/VRL-Studio/VRL-Zoom)
 
 This project demonstrates how to create a simple [VRL](http://vrl-studio.mihosoft.eu) zoom plugin.
 
