@@ -22,7 +22,7 @@ Join the [Developer Group](https://groups.google.com/forum/#!forum/vrl-developer
 Specify correct path in `build.properties`, e.g.,
     
     # vrl property folder location (plugin destination)
-    vrldir=/Users/myusername/.vrl/0.4.2/default
+    vrldir=/Users/myusername/.vrl/0.4.3/default
 
 ### 3. Build & Install
 
