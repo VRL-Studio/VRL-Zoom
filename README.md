@@ -4,6 +4,10 @@
 
 This project demonstrates how to create a simple [VRL](http://vrl-studio.mihosoft.eu) zoom plugin.
 
+![Normal Zoom](resources/img/normal-zoom-01.png)
+
+![Zoomed Out](resources/img/zoom-out-01.png)
+
 Webpage: http://vrl-studio.mihosoft.eu
 
 Join the [Developer Group](https://groups.google.com/forum/#!forum/vrl-developers) if you'd like to contribute.
