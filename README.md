@@ -17,6 +17,7 @@ Join the [Developer Group](https://groups.google.com/forum/#!forum/vrl-developer
 ### 1. Dependencies
 
 - JDK = 1.8
+- VRL >= 0.4.3
 - Internet Connection (other dependencies will be downloaded automatically)
 - Optional: IDE with [Gradle](http://www.gradle.org/) support
 
