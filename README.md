@@ -47,12 +47,12 @@ task to build and install the plugin.
 
 ##### Bash (Linux/OS X/Cygwin/other Unix-like OS)
 
-    cd Path/To/VRL-Tutorial-Plugin-01/VRL-Tutorial-Plugin-01
+    cd Path/To/VRL-Zoom/VRL-Zoom
     ./gradlew installVRLPlugin
     
 ##### Windows (CMD)
 
-    cd Path\To\VRL-Tutorial-Plugin-01\VRL-Tutorial-Plugin-01
+    cd Path\To\VRL-Zoom\VRL-Zoom
     gradlew installVRLPlugin
 
 Finally, restart VRL-Studio
