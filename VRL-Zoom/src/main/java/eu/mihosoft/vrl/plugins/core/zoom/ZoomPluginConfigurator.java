@@ -17,6 +17,7 @@ import eu.mihosoft.vrl.visual.CanvasRepaintManager;
 import eu.mihosoft.vrl.visual.VAction;
 import eu.mihosoft.vrl.visual.VDialog;
 import eu.mihosoft.vrl.visual.VKey;
+import eu.mihosoft.vrl.visual.VSeparator;
 import eu.mihosoft.vrl.visual.VShortCut;
 import eu.mihosoft.vrl.visual.VShortCutAction;
 import eu.mihosoft.vrl.visual.VSwingUtil;
@@ -96,7 +97,7 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
             // vapi.addComponent(MyComponent.class);
             // vapi.addTypeRepresentation(MyType.class);
             
-            
+            vapi.addAction(new VSeparator(),ActionDelegator.VIEW_MENU);
             
             vapi.addAction(new VAction("Zoom Out") {
 
