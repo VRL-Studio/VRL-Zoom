@@ -59,9 +59,10 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
         setDescription("Enables Canvas zooming.");
 
         // copyright info
-        setCopyrightInfo("Sample-Plugin",
-                "(c) Your Name",
-                "www.you.com", "License Name", "License Text...");
+        setCopyrightInfo("Zoom-Plugin",
+                "(c) Michael Hoffer",
+                "www.mihosoft.eu", "LGPL",
+                "For author and license info see VRL-Plugin");
 
         // specify dependencies
         addDependency(new PluginDependency("VRL", "0.4.3.0.1", "0.4.x"));
