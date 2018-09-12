@@ -46,9 +46,16 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
     VShortCutAction zoomOutAction;
     VShortCutAction zoomInAction;
 
+    ZoomType zoomType = ZoomType.SWING;
+
+    static enum ZoomType {
+        SWING,
+        JAVAFX
+    }
+
     public ZoomPluginConfigurator() {
         //specify the plugin name and version
-        setIdentifier(new PluginIdentifier("Zoom-Plugin", "0.1"));
+        setIdentifier(new PluginIdentifier("Zoom-Plugin", "0.2"));
 
         // optionally allow other plugins to use the api of this plugin
         // you can specify packages that shall be
@@ -100,6 +107,44 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
             
             vapi.addAction(new VSeparator(),ActionDelegator.VIEW_MENU);
             
+            vapi.addAction(new VAction("Zoom 100%") {
+
+                @Override
+                public void actionPerformed(ActionEvent ae, Object o) {
+                    setZoom(1.0, vapi);
+                }
+
+            }, ActionDelegator.VIEW_MENU);
+
+            vapi.addAction(new VAction("Zoom 75%") {
+
+                @Override
+                public void actionPerformed(ActionEvent ae, Object o) {
+                    setZoom(0.5, vapi);
+                }
+
+            }, ActionDelegator.VIEW_MENU);
+
+            vapi.addAction(new VAction("Zoom 50%") {
+
+                @Override
+                public void actionPerformed(ActionEvent ae, Object o) {
+                    setZoom(0.5, vapi);
+                }
+
+            }, ActionDelegator.VIEW_MENU);
+
+            vapi.addAction(new VAction("Zoom 25%") {
+
+                @Override
+                public void actionPerformed(ActionEvent ae, Object o) {
+                    setZoom(0.25, vapi);
+                }
+
+            }, ActionDelegator.VIEW_MENU);
+
+            vapi.addAction(new VSeparator(),ActionDelegator.VIEW_MENU);
+
             vapi.addAction(new VAction("Zoom Out") {
 
                 @Override
@@ -118,48 +163,73 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
 
             }, ActionDelegator.VIEW_MENU);
 
+            vapi.addAction(new VSeparator(),ActionDelegator.VIEW_MENU);
+
+            vapi.addAction(new VAction("Use Swing Zoom") {
+
+                @Override
+                public void actionPerformed(ActionEvent ae, Object o) {
+                    zoomType = ZoomType.SWING;
+                    setZoom(scale, vapi);
+                    System.out.println("> using Swing Zoom");
+                }
+
+            }, ActionDelegator.VIEW_MENU);
+
+            vapi.addAction(new VAction("Use JavaFX Zoom") {
+
+                @Override
+                public void actionPerformed(ActionEvent ae, Object o) {
+                    zoomType = ZoomType.JAVAFX;
+                    setZoom(scale, vapi);
+                    System.out.println("> using JavaFX Zoom");
+                }
+
+            }, ActionDelegator.VIEW_MENU);
+
             if (zoomInAction != null) {
                 VSwingUtil.unregisterShortCutAction(zoomInAction);
             }
+
             if (zoomOutAction != null) {
                 VSwingUtil.unregisterShortCutAction(zoomOutAction);
             }
 
-            VKey modifierKey1;
-            VKey modifierKey2;
+//            VKey modifierKey1;
+//            VKey modifierKey2;
+//
+//            // OS X treats ALT key differently. Therefore, we use the shift
+//            // key as modifier on OS X.
+//            if (VSysUtil.isMacOSX()) {
+//                modifierKey1 = new VKey(KeyEvent.VK_META);
+//                modifierKey2 = new VKey(KeyEvent.VK_SHIFT);
+//            } else {
+//                modifierKey1 = new VKey(KeyEvent.VK_CONTROL);
+//                modifierKey2 = new VKey(KeyEvent.VK_ALT);
+//            }
 
-            // OS X treats ALT key differently. Therefore, we use the shift
-            // key as modifier on OS X.
-            if (VSysUtil.isMacOSX()) {
-                modifierKey1 = new VKey(KeyEvent.VK_META);
-                modifierKey2 = new VKey(KeyEvent.VK_SHIFT);
-            } else {
-                modifierKey1 = new VKey(KeyEvent.VK_CONTROL);
-                modifierKey2 = new VKey(KeyEvent.VK_ALT);
-            }
-
-            zoomInAction = new VShortCutAction(
-                    new VShortCut("Zoom In",
-                            modifierKey1,
-                            modifierKey2,
-                            new VKey(KeyEvent.VK_9))) {
-                        @Override
-                        public void performAction() {
-                            incZoom(vapi);
-                        }
-                    };
-            VSwingUtil.registerShortCutAction(zoomInAction);
-            zoomOutAction = new VShortCutAction(
-                    new VShortCut("Zoom Out",
-                            modifierKey1,
-                            modifierKey2,
-                            new VKey(KeyEvent.VK_0))) {
-                        @Override
-                        public void performAction() {
-                            decZoom(vapi);
-                        }
-                    };
-            VSwingUtil.registerShortCutAction(zoomOutAction);
+//            zoomInAction = new VShortCutAction(
+//                    new VShortCut("Zoom In",
+//                            modifierKey1,
+//                            modifierKey2,
+//                            new VKey(KeyEvent.VK_9))) {
+//                        @Override
+//                        public void performAction() {
+//                            incZoom(vapi);
+//                        }
+//                    };
+//            VSwingUtil.registerShortCutAction(zoomInAction);
+//            zoomOutAction = new VShortCutAction(
+//                    new VShortCut("Zoom Out",
+//                            modifierKey1,
+//                            modifierKey2,
+//                            new VKey(KeyEvent.VK_0))) {
+//                        @Override
+//                        public void performAction() {
+//                            decZoom(vapi);
+//                        }
+//                    };
+//            VSwingUtil.registerShortCutAction(zoomOutAction);
 
             canvasParent = vapi.getCanvas().getParent();
 
@@ -173,21 +243,44 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
 
     }
 
+    private void setZoom(double zoom, VPluginAPI vApi) {
+        this.scale = zoom;
+
+        if (scale < 1.0) {
+            if(zoomType == ZoomType.SWING) {
+                enableZoomSwing(vApi);
+            } else {
+                enableZoomFX(vApi);
+            }
+        } else {
+            scale = 1.0;
+            disableZoom(vApi);
+        }
+    }
+
     private void decZoom(VPluginAPI vApi) {
-        scale -= 0.1;
+        scale -= 0.2;
 
         if (scale < 0.25) {
             scale = 0.25;
         }
 
-        enableZoomSwing(vApi);
+        if(zoomType == ZoomType.SWING) {
+            enableZoomSwing(vApi);
+        } else {
+            enableZoomFX(vApi);
+        }
     }
 
     private void incZoom(VPluginAPI vApi) {
-        scale += 0.1;
+        scale += 0.2;
 
         if (scale < 1.0) {
-            enableZoomSwing(vApi);
+            if(zoomType == ZoomType.SWING) {
+                enableZoomSwing(vApi);
+            } else {
+                enableZoomFX(vApi);
+            }
         } else {
             scale = 1.0;
             disableZoom(vApi);
@@ -205,7 +298,7 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
         canvasParent.add(canvasContainer);
         vCanvas.getDock().setVisible(false);
 
-        RepaintManager.setCurrentManager(new RepaintManager());
+        // RepaintManager.setCurrentManager(new RepaintManager());
     }
 
     @Deprecated
@@ -224,7 +317,7 @@ public class ZoomPluginConfigurator extends VPluginConfigurator {
         System.out.println("debug:2");
 
 //        RepaintManager canvasRepaintMagager = RepaintManager.currentManager(vCanvas);
-        RepaintManager.setCurrentManager(null);
+//        RepaintManager.setCurrentManager(null);
 
         Platform.runLater(() -> {
 
